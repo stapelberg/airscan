@@ -135,6 +135,10 @@ func airscan1() error {
 		return nil // only discovery requested, exit instead of scanning
 	}
 
+	if sc.service == nil {
+		return fmt.Errorf("no compatible scanner found")
+	}
+
 	if *conntest {
 		log.Println("testing reachability of all addresses:")
 		ctx = context.Background()
