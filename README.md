@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/stapelberg/airscan)](https://goreportcard.com/report/github.com/stapelberg/airscan)
+
 # airscan 📄 🖨️ 🕸️
 
 The `airscan` Go package can be used to scan paper documents 📄 from a scanner
