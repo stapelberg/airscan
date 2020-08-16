@@ -1,3 +1,4 @@
+![GitHub Actions CI](https://github.com/stapelberg/airscan/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/stapelberg/airscan)](https://goreportcard.com/report/github.com/stapelberg/airscan)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/stapelberg/airscan)
 
