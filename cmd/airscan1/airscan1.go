@@ -74,6 +74,18 @@ func airscan1() error {
 		"platen",
 		"Source of the document. One of platen (flat bed) or adf (Automatic Document Feeder)")
 
+	flag.StringVar(
+		&sc.size,
+		"size",
+		"A4",
+		"Page size. One of A4 or letter")
+
+	flag.StringVar(
+		&sc.format,
+		"format",
+		"image/jpeg",
+		"File format to request from the scanner")
+
 	var (
 		discover = flag.Duration("discover",
 			0,
@@ -170,6 +182,8 @@ type airscanner struct {
 	host    string
 	scanDir string
 	source  string
+	size    string
+	format  string
 	service *dnssd.Service
 }
 
@@ -184,6 +198,21 @@ func (sc *airscanner) scan1() error {
 	default:
 		return fmt.Errorf("unexpected source: got %q, want one of platen or adf", sc.source)
 	}
+	switch sc.size {
+	case "A4":
+	case "letter":
+		settings.ScanRegions.Regions[0].Width = 2550
+		settings.ScanRegions.Regions[0].Height = 3300
+	default:
+		return fmt.Errorf("unexpected page size: got %q, want one of A4 or letter", sc.size)
+	}
+	suffix := "jpg"
+	switch sc.format {
+	case "image/jpeg":
+	case "application/pdf":
+		suffix = "pdf"
+		settings.DocumentFormat = "application/pdf"
+	}
 	scan, err := cl.Scan(settings)
 	if err != nil {
 		return err
@@ -197,7 +226,7 @@ func (sc *airscanner) scan1() error {
 		}
 		var fn string
 		for {
-			fn = filepath.Join(sc.scanDir, fmt.Sprintf("page%d.jpg", pagenum))
+			fn = filepath.Join(sc.scanDir, fmt.Sprintf("page%d.%s", pagenum, suffix))
 			_, err := os.Stat(fn)
 			if err == nil /* file exists */ {
 				pagenum++
