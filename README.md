@@ -69,3 +69,4 @@ your report in this table for the benefit of other interested users:
 | Device Name | Working features | Known issues |
 | ----------- | ---------------- | ------------ |
 | Brother MFC-L2750DW | flat bed scan, automatic document feeder scan | |
+| HP Laserjet M479fdw | flat bed scan, automatic document feeder scan | |
