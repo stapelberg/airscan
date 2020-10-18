@@ -86,6 +86,12 @@ func airscan1() error {
 		"image/jpeg",
 		"File format to request from the scanner")
 
+	flag.BoolVar(
+		&sc.duplex,
+		"duplex",
+		true,
+		"if false, scan only the front side of the page")
+
 	var (
 		discover = flag.Duration("discover",
 			0,
@@ -184,6 +190,7 @@ type airscanner struct {
 	source  string
 	size    string
 	format  string
+	duplex  bool
 	service *dnssd.Service
 }
 
@@ -213,6 +220,8 @@ func (sc *airscanner) scan1() error {
 		suffix = "pdf"
 		settings.DocumentFormat = "application/pdf"
 	}
+	settings.Duplex = sc.duplex
+
 	scan, err := cl.Scan(settings)
 	if err != nil {
 		return err
