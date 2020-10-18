@@ -70,3 +70,4 @@ your report in this table for the benefit of other interested users:
 | ----------- | ---------------- | ------------ |
 | Brother MFC-L2750DW | flat bed scan, automatic document feeder scan | |
 | HP Laserjet M479fdw | flat bed scan, automatic document feeder scan | |
+| Brother MFC-L2710DN | flat bed scan, automatic document feeder scan | must be run with -duplex=false |
