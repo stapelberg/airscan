@@ -86,6 +86,12 @@ func airscan1() error {
 		"image/jpeg",
 		"File format to request from the scanner")
 
+	flag.StringVar(
+		&sc.color,
+		"color",
+		"Grayscale8",
+		"Color mode to request from the scanner (Grayscale8, RGB24)")
+
 	flag.BoolVar(
 		&sc.duplex,
 		"duplex",
@@ -190,6 +196,7 @@ type airscanner struct {
 	source  string
 	size    string
 	format  string
+	color   string
 	duplex  bool
 	service *dnssd.Service
 }
@@ -219,6 +226,11 @@ func (sc *airscanner) scan1() error {
 	case "application/pdf":
 		suffix = "pdf"
 		settings.DocumentFormat = "application/pdf"
+	}
+	switch sc.color {
+	case "Grayscale8":
+	case "RGB24":
+		settings.ColorMode = "RGB24"
 	}
 	settings.Duplex = sc.duplex
 
