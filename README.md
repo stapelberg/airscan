@@ -41,6 +41,15 @@ Now, I can scan the contents of the flatbed scanner:
 2020/08/16 11:10:47 scan done in 13.068799513s
 ```
 
+…or the page(s) from ADF, colored, and as single PDF file output:
+```
+% airscan1 -host=HPFXXXXXXXXXXXX -source adf -color RGB24 -format "application/pdf"
+2021/04/04 00:12:13 finding device for 5s (use -timeout=0 for unlimited)
+2021/04/04 00:12:14 device "HP OfficeJet Pro 9010 series" found in 315.486148ms
+2021/04/04 00:14:07 wrote /tmp/page5.pdf (123456 bytes)
+2021/04/04 00:14:07 scan done in 1m53.772520178s
+```
+
 ## Getting started: using the package in your program
 
 See the [package airscan examples in
