@@ -99,10 +99,6 @@ func airscan1() error {
 		"if false, scan only the front side of the page")
 
 	var (
-		discover = flag.Duration("discover",
-			0,
-			"if non-zero, discover (and list) airscan compatible devices for the specified duration, then exit")
-
 		timeout = flag.Duration("timeout",
 			5*time.Second,
 			"if non-zero, limit time for finding the device")
@@ -115,12 +111,15 @@ func airscan1() error {
 
 	ctx, canc := context.WithCancel(context.Background())
 	defer canc()
-	if *discover != 0 {
-		log.Printf("finding airscan-compatible devices for %v", *discover)
-		ctx, canc = context.WithTimeout(ctx, *discover)
-		defer canc()
-	} else if *timeout != 0 {
-		log.Printf("finding device for %v (use -timeout=0 for unlimited)", *timeout)
+
+	// No -host parameter? Do a discovery to list compatible devices
+	discovery := sc.host == ""
+	if discovery {
+		log.Printf("discovering all airscan devices in the local network (timeout: %v)", *timeout)
+	} else {
+		log.Printf("finding device %q for %v (use -timeout=0 for unlimited)", sc.host, *timeout)
+	}
+	if *timeout > 0 {
 		ctx, canc = context.WithTimeout(ctx, *timeout)
 		defer canc()
 	}
@@ -155,12 +154,12 @@ func airscan1() error {
 		return err
 	}
 
-	if *discover != 0 {
+	if discovery {
 		return nil // only discovery requested, exit instead of scanning
 	}
 
 	if sc.service == nil {
-		return fmt.Errorf("no compatible scanner found")
+		return fmt.Errorf("scanner %q not found", sc.host)
 	}
 
 	if *conntest {
