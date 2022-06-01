@@ -24,7 +24,7 @@ import (
 	"github.com/brutella/dnssd"
 )
 
-func testConns(ctx context.Context, service *dnssd.Service) {
+func testConns(ctx context.Context, service *dnssd.BrowseEntry) {
 	port := strconv.Itoa(service.Port)
 	hostports := []string{
 		// DHCP-based DNS in the local network:

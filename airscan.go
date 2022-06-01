@@ -329,7 +329,7 @@ func NewClient(host string) *Client {
 //
 // This maximizes the chance of a successful connection, even when local
 // networks do not offer DHCP-based DNS, and when Avahi is not available.
-func NewClientForService(service *dnssd.Service) *Client {
+func NewClientForService(service *dnssd.BrowseEntry) *Client {
 	port := strconv.Itoa(service.Port)
 	hostports := []string{
 		// DHCP-based DNS in the local network:

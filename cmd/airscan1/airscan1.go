@@ -35,7 +35,7 @@ import (
 	"github.com/stapelberg/airscan/preset"
 )
 
-func humanDeviceName(srv dnssd.Service) string {
+func humanDeviceName(srv dnssd.BrowseEntry) string {
 	if ty := srv.Text["ty"]; ty != "" {
 		return ty
 	}
@@ -126,7 +126,7 @@ func airscan1() error {
 
 	discoverStart := time.Now()
 
-	addFn := func(service dnssd.Service) {
+	addFn := func(service dnssd.BrowseEntry) {
 		if sc.debug {
 			log.Printf("DNSSD service discovered: %v", spew.Sdump(service))
 		}
@@ -142,7 +142,7 @@ func airscan1() error {
 		log.Printf("device %q discovered (use -host=%q)", humanName, service.Host)
 	}
 
-	rmvFn := func(srv dnssd.Service) {
+	rmvFn := func(srv dnssd.BrowseEntry) {
 		log.Printf("device %q vanished", humanDeviceName(srv))
 	}
 
@@ -197,7 +197,7 @@ type airscanner struct {
 	format  string
 	color   string
 	duplex  bool
-	service *dnssd.Service
+	service *dnssd.BrowseEntry
 }
 
 func (sc *airscanner) scan1() error {
