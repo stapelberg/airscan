@@ -21,7 +21,7 @@ func TestDialer(t *testing.T) {
 	addr := ln.Addr().(*net.TCPAddr)
 
 	// use a dnssd service struct
-	svc := dnssd.Service{
+	svc := dnssd.BrowseEntry{
 		// Likely unreachable:
 		Host:   "unreachable.invalid",
 		Domain: "local",

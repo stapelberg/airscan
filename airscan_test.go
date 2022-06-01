@@ -160,7 +160,7 @@ func TestScan(t *testing.T) {
 	}
 }
 
-var discoveredService *dnssd.Service // descriptive name for ExampleClient_Scan
+var discoveredService *dnssd.BrowseEntry // descriptive name for ExampleClient_Scan
 
 func ExampleClient_Scan() {
 	// For a full example using DNSSD service discovery, see:
