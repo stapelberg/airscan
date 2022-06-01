@@ -18,7 +18,7 @@ go get -v github.com/stapelberg/airscan/cmd/airscan1
 Then, query the local network for AirScan compatible devices:
 
 ```
-% airscan1 -discover=5s
+% airscan1
 2020/08/16 08:50:31 finding airscan-compatible devices for 1s
 2020/08/16 08:50:31 device "Brother MFC-L2750DW series" discovered (use -host="BRW405BD8AxxDyz")
 ```
