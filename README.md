@@ -81,3 +81,5 @@ your report in this table for the benefit of other interested users:
 | HP Laserjet M479fdw | flat bed scan, automatic document feeder scan | |
 | Brother MFC-L2710DN | flat bed scan, automatic document feeder scan | must be run with -duplex=false |
 | HP OfficeJet Pro 9010 series | flat bed scan, automatic document feeder scan, color: RGB24 | |
+| Canon G3560 | flat bed scan, color: RGB24 | |
+
