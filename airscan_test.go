@@ -65,6 +65,7 @@ func mockScanner() http.Handler {
 		http.Redirect(w, r, "http://localhost:9/eSCL/ScanJobs/"+key, http.StatusCreated)
 	})
 
+	shouldFail := true // return a 503 on `NextDocument`
 	mux.HandleFunc("/eSCL/ScanJobs/", func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/eSCL/ScanJobs/")
 		if id == "" {
@@ -83,12 +84,19 @@ func mockScanner() http.Handler {
 		scansMu.Lock()
 		pages, ok := scans[id]
 		if ok && pages > 0 {
-			scans[id] = pages - 1
-			if scans[id] == 0 {
-				delete(scans, id)
+			if !shouldFail {
+				scans[id] = pages - 1
+				if scans[id] == 0 {
+					delete(scans, id)
+				}
 			}
 		}
 		scansMu.Unlock()
+		if shouldFail {
+			http.Error(w, "service unavailable", http.StatusServiceUnavailable)
+			shouldFail = false // failed once, work on the next call to `NextDocument`
+			return
+		}
 		if !ok {
 			http.Error(w, "no such job", http.StatusNotFound)
 			return
