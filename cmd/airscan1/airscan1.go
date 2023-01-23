@@ -19,10 +19,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,6 +63,12 @@ func airscan1() error {
 		"host",
 		"",
 		"if specified, locate the scanner to use based on its Hostname")
+
+	flag.BoolVar(
+		&sc.skipCertVerify,
+		"skip_cert_verify",
+		false,
+		"if true, skip TLS certificate verification")
 
 	flag.StringVar(
 		&sc.scanDir,
@@ -189,19 +197,22 @@ func airscan1() error {
 }
 
 type airscanner struct {
-	debug   bool
-	host    string
-	scanDir string
-	source  string
-	size    string
-	format  string
-	color   string
-	duplex  bool
-	service *dnssd.BrowseEntry
+	debug          bool
+	host           string
+	skipCertVerify bool
+	scanDir        string
+	source         string
+	size           string
+	format         string
+	color          string
+	duplex         bool
+	service        *dnssd.BrowseEntry
 }
 
 func (sc *airscanner) scan1() error {
 	cl := airscan.NewClientForService(sc.service)
+	transport := cl.HTTPClient.(*http.Client).Transport.(*http.Transport)
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: sc.skipCertVerify}
 
 	settings := preset.GrayscaleA4ADF()
 	switch sc.source {
