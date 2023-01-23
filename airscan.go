@@ -205,6 +205,10 @@ type ScanState struct {
 // ScanPage requests the next page of this scan job. It returns true if a new
 // page is available, or false when all pages were exhausted or an error
 // occurred. Errors are available via the Err() method.
+//
+// Note that some scanners return 503 for NextDocument but will eventually
+// return an accurate code when given more chances. See also
+// https://github.com/alexpevzner/sane-airscan-ipp/blob/master/airscan-escl.c#L11.
 func (s *ScanState) ScanPage() bool {
 	if s.err != nil {
 		return false // avoid clobbering existing errors
@@ -221,19 +225,34 @@ func (s *ScanState) ScanPage() bool {
 		s.err = err
 		return false
 	}
-	resp, err := s.scanner.do(req, http.StatusOK, http.StatusNotFound)
-	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		if debug {
-			log.Printf("NotFound: all pages received")
+	const tries = 10
+	for try := 0; try < tries; try++ {
+		resp, err := s.scanner.do(req, http.StatusOK, http.StatusNotFound, http.StatusServiceUnavailable)
+		if resp != nil {
+			switch resp.StatusCode {
+			case http.StatusNotFound:
+				if debug {
+					log.Printf("NotFound: all pages received")
+				}
+				return false // all pages received, no error
+			case http.StatusServiceUnavailable:
+				if debug {
+					log.Printf("ServiceUnavailable: will retry (try %d/%d)", try+1, tries)
+				}
+				time.Sleep(1 * time.Second)
+				continue
+			default:
+				s.reader = resp.Body
+				return true
+			}
 		}
-		return false // all pages received, no error
+		if err != nil {
+			s.err = err
+			return false
+		}
 	}
-	if err != nil {
-		s.err = err
-		return false
-	}
-	s.reader = resp.Body
-	return true
+	s.err = fmt.Errorf("503 retry limit (%d) reached while calling NextDocument", tries)
+	return false
 }
 
 // CurrentPage returns an io.Reader containing the scan data.
