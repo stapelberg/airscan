@@ -72,14 +72,15 @@ If you have any improvements, I’d be happy to review a pull request. Please se
 
 If you successfully scanned documents from your device using the `airscan1`
 example program as described above, please [send a pull
-request](https://github.com/stapelberg/airscan/edit/master/README.md) to include
+request](https://github.com/stapelberg/airscan/edit/main/README.md) to include
 your report in this table for the benefit of other interested users:
 
 | Device Name | Working features | Known issues |
 | ----------- | ---------------- | ------------ |
-| Brother MFC-L2750DW | flat bed scan, automatic document feeder scan | |
-| HP Laserjet M479fdw | flat bed scan, automatic document feeder scan | |
 | Brother MFC-L2710DN | flat bed scan, automatic document feeder scan | must be run with -duplex=false |
-| HP OfficeJet Pro 9010 series | flat bed scan, automatic document feeder scan, color: RGB24 | |
+| Brother MFC-L2750DW | flat bed scan, automatic document feeder scan | |
 | Canon G3560 | flat bed scan, color: RGB24 | |
+| Epson XP-7100 | flat bed scan, automatic document feeder scan | must be run with -duplex=false for flat bed scanning; also needs -skip_cert_verify |
+| HP Laserjet M479fdw | flat bed scan, automatic document feeder scan | |
+| HP OfficeJet Pro 9010 series | flat bed scan, automatic document feeder scan, color: RGB24 | |
 
