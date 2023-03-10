@@ -18,7 +18,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -131,7 +130,7 @@ func (c *Client) do(req *http.Request, okayStatuses ...int) (resp *http.Response
 	if len(okayStatuses) == 1 {
 		want = fmt.Sprint(okayStatuses[0])
 	}
-	b, _ := ioutil.ReadAll(resp.Body)
+	b, _ := io.ReadAll(resp.Body)
 	message := strings.TrimSpace(string(b))
 	if !isPrintable(message) {
 		message = "<non-printable body>"
@@ -147,7 +146,7 @@ func (c *Client) do(req *http.Request, okayStatuses ...int) (resp *http.Response
 // to find out whether a document has been inserted into the Automatic Document
 // Feeder (ADF). The Scan method verifies this, too.
 func (c *Client) ScannerStatus() (*ScannerStatus, error) {
-	req, err := http.NewRequest("GET", "http://"+c.host+"/eSCL/ScannerStatus", nil)
+	req, err := http.NewRequest("GET", c.GetEndpoint("/eSCL/ScannerStatus"), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +154,7 @@ func (c *Client) ScannerStatus() (*ScannerStatus, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -166,8 +165,28 @@ func (c *Client) ScannerStatus() (*ScannerStatus, error) {
 	return &status, nil
 }
 
+func (c *Client) ScannerCapabilities() (*ScannerCapabilities, error) {
+	req, err := http.NewRequest("GET", c.GetEndpoint("/eSCL/ScannerCapabilities"), nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do(req, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var capabilities ScannerCapabilities
+	if err := xml.Unmarshal(b, &capabilities); err != nil {
+		return nil, fmt.Errorf("decoding XML: %v (invalid input? %q)", err, string(b))
+	}
+	return &capabilities, nil
+}
+
 func (c *Client) createScanJob(settings string) (*url.URL, error) {
-	req, err := http.NewRequest("POST", "http://"+c.host+"/eSCL/ScanJobs", strings.NewReader(settings))
+	req, err := http.NewRequest("POST", c.GetEndpoint("/eSCL/ScanJobs"), strings.NewReader(settings))
 	if err != nil {
 		return nil, err
 	}
@@ -314,6 +333,31 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 		}
 	}
 
+	// Check capabilities
+	caps, err := c.ScannerCapabilities()
+	if err != nil {
+		return nil, err
+	}
+
+	if settings.InputSource == "Feeder" {
+		if caps.Adf == nil {
+			return nil, fmt.Errorf("this scanner doesn't have an ADF")
+		}
+
+		if settings.Duplex && caps.Adf.AdfDuplexInputCaps == nil {
+			return nil, fmt.Errorf("this scanner doesn't support duplex mode")
+		}
+
+		if !settings.Duplex && caps.Adf.AdfSimplexInputCaps == nil {
+			// can this ever happen?
+			return nil, fmt.Errorf("this scanner doesn't support simplex mode")
+		}
+	}
+
+	if debug {
+		log.Printf("capabilities: %+v", caps)
+	}
+
 	loc, err := c.createScanJob(s)
 	if err != nil {
 		return nil, err
@@ -326,6 +370,10 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 		loc:     loc,
 		scanner: c,
 	}, nil
+}
+
+func (c *Client) GetEndpoint(s string) string {
+	return fmt.Sprintf("http://%s%s", c.host, s)
 }
 
 // NewClient returns a ready-to-use Client. It is safe to update its struct
