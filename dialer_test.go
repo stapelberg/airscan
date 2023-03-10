@@ -16,7 +16,7 @@ func TestDialer(t *testing.T) {
 	}
 	defer ln.Close()
 
-	go http.Serve(ln, mockScanner())
+	go http.Serve(ln, mockScanner(t))
 
 	addr := ln.Addr().(*net.TCPAddr)
 

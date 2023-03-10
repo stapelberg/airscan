@@ -22,6 +22,8 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path"
 	"strings"
 	"sync"
 	"testing"
@@ -34,12 +36,26 @@ import (
 
 var binaryScanDataStandIn = []byte{0x22, 0x33, 0x44}
 
-func mockScanner() http.Handler {
+func getEsclMockFile(t *testing.T, name string) io.ReadCloser {
+	filePath := path.Join("resources/eSCL", name)
+	f, err := os.Open(filePath)
+	if err != nil {
+		t.Fatalf("unable to open file %s", filePath)
+	}
+
+	return f
+}
+
+func mockScanner(t *testing.T) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/eSCL/ScannerStatus", func(w http.ResponseWriter, r *http.Request) {
-		const scanStatusGolden = `<?xml version="1.0" encoding="UTF-8"?><scan:ScannerStatus xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm" xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.hp.com/imaging/escl/2011/05/03 ../../schemas/eSCL-1_92.xsd"><pwg:Version>2.63</pwg:Version><pwg:State>Idle</pwg:State><scan:AdfState>ScannerAdfEmpty</scan:AdfState><scan:Jobs></scan:Jobs></scan:ScannerStatus>`
-		io.WriteString(w, scanStatusGolden)
+		io.Copy(w, getEsclMockFile(t, "ScannerStatus.xml"))
+	})
+
+	mux.HandleFunc("/eSCL/ScannerCapabilities", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		io.Copy(w, getEsclMockFile(t, "ScannerCapabilities.xml"))
 	})
 
 	var (
@@ -109,7 +125,7 @@ func mockScanner() http.Handler {
 
 func clientForMockScanner(t *testing.T) *airscan.Client {
 	t.Helper()
-	srv := httptest.NewServer(mockScanner())
+	srv := httptest.NewServer(mockScanner(t))
 	t.Cleanup(func() { srv.Close() })
 	// round-trip the listener address through net.SplitHostPort and
 	// net.JoinHostPort to verify that it is indeed a host:port address:
