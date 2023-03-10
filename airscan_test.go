@@ -18,7 +18,6 @@ import (
 	crypto_rand "crypto/rand"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -164,7 +163,7 @@ func TestScan(t *testing.T) {
 	}
 	var pages [][]byte
 	for job.ScanPage() {
-		b, err := ioutil.ReadAll(job.CurrentPage())
+		b, err := io.ReadAll(job.CurrentPage())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -204,7 +203,7 @@ func ExampleClient_Scan() {
 	for job.ScanPage() {
 		// Read and discard scan data. This is where you would typically save
 		// the data to a file, send it via the net, display or process it, etc.:
-		if _, err := io.Copy(ioutil.Discard, job.CurrentPage()); err != nil {
+		if _, err := io.Copy(io.Discard, job.CurrentPage()); err != nil {
 			panic(err)
 		}
 	}
