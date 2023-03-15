@@ -90,7 +90,8 @@ type Client struct {
 		Do(*http.Request) (*http.Response, error)
 	}
 
-	host string
+	host  string
+	debug bool
 }
 
 func isPrintable(s string) bool {
@@ -106,7 +107,7 @@ func isPrintable(s string) bool {
 // do wraps c.Client.Do, but tries to report a descriptive error, including a
 // server-sent error message, if any (and printable!).
 func (c *Client) do(req *http.Request, okayStatuses ...int) (resp *http.Response, err error) {
-	if debug {
+	if c.debug {
 		log.Printf("%s %s", req.Method, req.URL)
 		defer func() {
 			if err != nil {
@@ -150,7 +151,12 @@ func (c *Client) ScannerStatus() (*ScannerStatus, error) {
 	if err != nil {
 		return nil, err
 	}
+	start := time.Now()
 	resp, err := c.do(req, http.StatusOK)
+	elapsed := time.Now().Sub(start).Milliseconds()
+	if c.debug {
+		log.Printf("ScannerStatus request took %d ms", elapsed)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +171,7 @@ func (c *Client) ScannerStatus() (*ScannerStatus, error) {
 	return &status, nil
 }
 
-func (c *Client) ScannerCapabilities() (*ScannerCapabilities, error) {
+func (c *Client) ScannerCapabilities() (*scannerCapabilities, error) {
 	req, err := http.NewRequest("GET", c.GetEndpoint("/eSCL/ScannerCapabilities"), nil)
 	if err != nil {
 		return nil, err
@@ -178,7 +184,7 @@ func (c *Client) ScannerCapabilities() (*ScannerCapabilities, error) {
 	if err != nil {
 		return nil, err
 	}
-	var capabilities ScannerCapabilities
+	var capabilities scannerCapabilities
 	if err := xml.Unmarshal(b, &capabilities); err != nil {
 		return nil, fmt.Errorf("decoding XML: %v (invalid input? %q)", err, string(b))
 	}
@@ -250,12 +256,12 @@ func (s *ScanState) ScanPage() bool {
 		if resp != nil {
 			switch resp.StatusCode {
 			case http.StatusNotFound:
-				if debug {
+				if s.scanner.debug {
 					log.Printf("NotFound: all pages received")
 				}
 				return false // all pages received, no error
 			case http.StatusServiceUnavailable:
-				if debug {
+				if s.scanner.debug {
 					log.Printf("ServiceUnavailable: will retry (try %d/%d)", try+1, tries)
 				}
 				time.Sleep(1 * time.Second)
@@ -299,7 +305,7 @@ func (s *ScanState) Err() error {
 // scan program does, which might be required for certain scanners (speculation
 // only).
 func (s *ScanState) Close() error {
-	if debug {
+	if s.scanner.debug {
 		log.Printf("Deleting ScanJob %s", s.loc)
 	}
 	return s.scanner.deleteScanJob(s.loc)
@@ -321,7 +327,7 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 	if err != nil {
 		return nil, err
 	}
-	if debug {
+	if c.debug {
 		log.Printf("scanner status: %+v", status)
 	}
 	if got, want := status.State, "Idle"; got != want {
@@ -354,7 +360,7 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 		}
 	}
 
-	if debug {
+	if c.debug {
 		log.Printf("capabilities: %+v", caps)
 	}
 
@@ -362,7 +368,7 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 	if err != nil {
 		return nil, err
 	}
-	if debug {
+	if c.debug {
 		log.Printf("ScanJob created: %s", loc)
 	}
 
@@ -373,7 +379,7 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 }
 
 func (c *Client) GetEndpoint(s string) string {
-	return fmt.Sprintf("http://%s%s", c.host, s)
+	return "http://" + c.host + s
 }
 
 // NewClient returns a ready-to-use Client. It is safe to update its struct
@@ -410,22 +416,26 @@ func NewClientForService(service *dnssd.BrowseEntry) *Client {
 		hostports = append(hostports, net.JoinHostPort(ip.String(), port))
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.DialContext = (&fallbackDialer{
+	fbDialer := fallbackDialer{
 		hostports: hostports,
 		underlying: &net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
-			DualStack: true,
+			Resolver:  &net.Resolver{StrictErrors: true},
+			LocalAddr: &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: service.Port},
 		},
-	}).DialContext
-	return &Client{
+	}
+	transport.DialContext = fbDialer.DialContext
+	c := &Client{
 		host: service.Host,
 		HTTPClient: &http.Client{
 			Transport: transport,
 		},
 	}
-
+	fbDialer.debug = &c.debug
+	return c
 }
 
-// Flip debug to true during development
-const debug = false
+func (c *Client) SetDebug(debug bool) {
+	c.debug = debug
+}
