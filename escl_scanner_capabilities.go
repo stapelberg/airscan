@@ -1,18 +1,18 @@
 package airscan
 
-type Adf struct {
-	AdfOptions          AdfOptions           `xml:"AdfOptions"`
-	AdfSimplexInputCaps *AdfSimplexInputCaps `xml:"AdfSimplexInputCaps"`
-	AdfDuplexInputCaps  *AdfDuplexInputCaps  `xml:"AdfDuplexInputCaps"`
+type adf struct {
+	AdfOptions          adfOptions           `xml:"AdfOptions"`
+	AdfSimplexInputCaps *adfSimplexInputCaps `xml:"AdfSimplexInputCaps"`
+	AdfDuplexInputCaps  *adfDuplexInputCaps  `xml:"AdfDuplexInputCaps"`
 	FeederCapacity      int                  `xml:"FeederCapacity"`
-	Justification       Justification        `xml:"Justification"`
+	Justification       justification        `xml:"Justification"`
 }
 
-type AdfOptions struct {
+type adfOptions struct {
 	AdfOption string `xml:"AdfOption"`
 }
 
-type AdfSimplexInputCaps struct {
+type adfSimplexInputCaps struct {
 	MaxHeight             int              `xml:"MaxHeight"`
 	MaxOpticalXResolution int              `xml:"MaxOpticalXResolution"`
 	MaxOpticalYResolution int              `xml:"MaxOpticalYResolution"`
@@ -22,69 +22,69 @@ type AdfSimplexInputCaps struct {
 	MaxWidth              int              `xml:"MaxWidth"`
 	MinHeight             int              `xml:"MinHeight"`
 	MinWidth              int              `xml:"MinWidth"`
-	SettingProfiles       SettingProfiles  `xml:"SettingProfiles"`
-	SupportedIntents      SupportedIntents `xml:"SupportedIntents"`
+	SettingProfiles       settingProfiles  `xml:"SettingProfiles"`
+	SupportedIntents      supportedIntents `xml:"SupportedIntents"`
 }
 
-type AdfDuplexInputCaps struct {
-	FeedDirections   FeedDirections   `xml:"FeedDirections"`
+type adfDuplexInputCaps struct {
+	FeedDirections   feedDirections   `xml:"FeedDirections"`
 	MaxHeight        int              `xml:"MaxHeight"`
 	MaxWidth         int              `xml:"MaxWidth"`
 	MinHeight        int              `xml:"MinHeight"`
 	MinWidth         int              `xml:"MinWidth"`
-	SettingProfiles  SettingProfiles  `xml:"SettingProfiles"`
-	SupportedIntents SupportedIntents `xml:"SupportedIntents"`
+	SettingProfiles  settingProfiles  `xml:"SettingProfiles"`
+	SupportedIntents supportedIntents `xml:"SupportedIntents"`
 }
 
-type FeedDirections struct {
+type feedDirections struct {
 	FeedDirection []string `xml:"FeedDirection"`
 }
 
-type CcdChannels struct {
+type ccdChannels struct {
 	CcdChannel []string `xml:"CcdChannel"`
 }
 
-type Certifications struct {
+type certifications struct {
 	Name    string  `xml:"Name"`
 	Version float64 `xml:"Version"`
 }
 
-type ColorModes struct {
+type colorModes struct {
 	ColorMode []string `xml:"ColorMode"`
 }
 
-type ColorSpaces struct {
+type colorSpaces struct {
 	ColorSpace string `xml:"ColorSpace"`
 }
 
-type ContentTypes struct {
+type contentTypes struct {
 	ContentType []string `xml:"ContentType"`
 }
 
-type DiscreteResolution struct {
+type discreteResolution struct {
 	XResolution int `xml:"XResolution"`
 	YResolution int `xml:"YResolution"`
 }
 
-type DiscreteResolutions struct {
-	DiscreteResolution DiscreteResolution `xml:"DiscreteResolution"`
+type discreteResolutions struct {
+	DiscreteResolution discreteResolution `xml:"DiscreteResolution"`
 }
 
-type DocumentFormats struct {
+type documentFormats struct {
 	DocumentFormat    []string `xml:"DocumentFormat"`
 	DocumentFormatExt []string `xml:"DocumentFormatExt"`
 }
 
-type Justification struct {
+type justification struct {
 	XImagePosition string `xml:"XImagePosition"`
 	YImagePosition string `xml:"YImagePosition"`
 }
 
-type Platen struct {
-	PlatenInputCaps PlatenInputCaps `xml:"PlatenInputCaps"`
+type platen struct {
+	PlatenInputCaps platenInputCaps `xml:"PlatenInputCaps"`
 }
 
-type PlatenInputCaps struct {
+type platenInputCaps struct {
 	MaxHeight             int              `xml:"MaxHeight"`
 	MaxOpticalXResolution int              `xml:"MaxOpticalXResolution"`
 	MaxOpticalYResolution int              `xml:"MaxOpticalYResolution"`
@@ -94,48 +94,48 @@ type PlatenInputCaps struct {
 	MaxWidth              int              `xml:"MaxWidth"`
 	MinHeight             int              `xml:"MinHeight"`
 	MinWidth              int              `xml:"MinWidth"`
-	SettingProfiles       SettingProfiles  `xml:"SettingProfiles"`
-	SupportedIntents      SupportedIntents `xml:"SupportedIntents"`
+	SettingProfiles       settingProfiles  `xml:"SettingProfiles"`
+	SupportedIntents      supportedIntents `xml:"SupportedIntents"`
 }
 
-type ScannerCapabilities struct {
-	Adf            *Adf           `xml:"Adf"`
+type scannerCapabilities struct {
+	Adf            *adf           `xml:"Adf"`
 	AdminURI       string         `xml:"AdminURI"`
-	Certifications Certifications `xml:"Certifications"`
+	Certifications certifications `xml:"Certifications"`
 	IconURI        string         `xml:"IconURI"`
 	MakeAndModel   string         `xml:"MakeAndModel"`
 	Manufacturer   string         `xml:"Manufacturer"`
-	Platen         *Platen        `xml:"Platen"`
+	Platen         *platen        `xml:"Platen"`
 	SerialNumber   string         `xml:"SerialNumber"`
-	SharpenSupport SharpenSupport `xml:"SharpenSupport"`
+	SharpenSupport sharpenSupport `xml:"SharpenSupport"`
 	UUID           string         `xml:"UUID"`
 	Version        float64        `xml:"Version"`
 }
 
-type SettingProfile struct {
-	CcdChannels          CcdChannels          `xml:"CcdChannels"`
-	ColorModes           ColorModes           `xml:"ColorModes"`
-	ColorSpaces          ColorSpaces          `xml:"ColorSpaces"`
-	ContentTypes         ContentTypes         `xml:"ContentTypes"`
-	DocumentFormats      DocumentFormats      `xml:"DocumentFormats"`
-	SupportedResolutions SupportedResolutions `xml:"SupportedResolutions"`
+type settingProfile struct {
+	CcdChannels          ccdChannels          `xml:"CcdChannels"`
+	ColorModes           colorModes           `xml:"ColorModes"`
+	ColorSpaces          colorSpaces          `xml:"ColorSpaces"`
+	ContentTypes         contentTypes         `xml:"ContentTypes"`
+	DocumentFormats      documentFormats      `xml:"DocumentFormats"`
+	SupportedResolutions supportedResolutions `xml:"SupportedResolutions"`
 }
 
-type SettingProfiles struct {
-	SettingProfile SettingProfile `xml:"SettingProfile"`
+type settingProfiles struct {
+	SettingProfile settingProfile `xml:"SettingProfile"`
 }
 
-type SharpenSupport struct {
+type sharpenSupport struct {
 	Max    int  `xml:"Max"`
 	Min    bool `xml:"Min"`
 	Normal int  `xml:"Normal"`
 	Step   bool `xml:"Step"`
 }
 
-type SupportedIntents struct {
+type supportedIntents struct {
 	Intent []string `xml:"Intent"`
 }
 
-type SupportedResolutions struct {
-	DiscreteResolutions DiscreteResolutions `xml:"DiscreteResolutions"`
+type supportedResolutions struct {
+	DiscreteResolutions discreteResolutions `xml:"DiscreteResolutions"`
 }
