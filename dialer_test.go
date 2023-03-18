@@ -24,7 +24,7 @@ func TestDialer(t *testing.T) {
 	svc := dnssd.BrowseEntry{
 		// Likely unreachable:
 		Host:   "unreachable.invalid",
-		Domain: "local",
+		Domain: "localhost",
 		Port:   addr.Port,
 		IPs: []net.IP{
 			// Likely unreachable:
@@ -34,6 +34,7 @@ func TestDialer(t *testing.T) {
 		},
 	}
 	cl := airscan.NewClientForService(&svc)
+	cl.SetDebug(true)
 	if _, err := cl.ScannerStatus(); err != nil {
 		t.Fatal(err)
 	}
