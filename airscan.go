@@ -111,7 +111,11 @@ func (c *Client) do(req *http.Request, okayStatuses ...int) (resp *http.Response
 		log.Printf("%s %s", req.Method, req.URL)
 		defer func() {
 			if err != nil {
-				log.Printf("-> error: %v, %v", resp.Status, err)
+				if resp != nil {
+					log.Printf("-> error: %v, %v", resp.Status, err)
+				} else {
+					log.Printf("-> error: %v", err)
+				}
 			} else {
 				log.Printf("-> okay: %v", resp.Status)
 			}
@@ -421,8 +425,6 @@ func NewClientForService(service *dnssd.BrowseEntry) *Client {
 		underlying: &net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
-			Resolver:  &net.Resolver{StrictErrors: true},
-			LocalAddr: &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: service.Port},
 		},
 	}
 	transport.DialContext = fbDialer.DialContext
