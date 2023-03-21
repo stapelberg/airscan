@@ -35,7 +35,7 @@ import (
 
 var binaryScanDataStandIn = []byte{0x22, 0x33, 0x44}
 
-func getEsclMockFile(t *testing.T, name string) io.ReadCloser {
+func openEsclMockFile(t *testing.T, name string) io.ReadCloser {
 	filePath := path.Join("resources/eSCL", name)
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -49,12 +49,12 @@ func mockScanner(t *testing.T) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/eSCL/ScannerStatus", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(w, getEsclMockFile(t, "ScannerStatus.xml"))
+		io.Copy(w, openEsclMockFile(t, "ScannerStatus.xml"))
 	})
 
 	mux.HandleFunc("/eSCL/ScannerCapabilities", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		io.Copy(w, getEsclMockFile(t, "ScannerCapabilities.xml"))
+		io.Copy(w, openEsclMockFile(t, "ScannerCapabilities.xml"))
 	})
 
 	var (

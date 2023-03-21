@@ -151,7 +151,7 @@ func (c *Client) do(req *http.Request, okayStatuses ...int) (resp *http.Response
 // to find out whether a document has been inserted into the Automatic Document
 // Feeder (ADF). The Scan method verifies this, too.
 func (c *Client) ScannerStatus() (*ScannerStatus, error) {
-	req, err := http.NewRequest("GET", c.GetEndpoint("/eSCL/ScannerStatus"), nil)
+	req, err := http.NewRequest("GET", c.getEndpoint("/eSCL/ScannerStatus"), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (c *Client) ScannerStatus() (*ScannerStatus, error) {
 }
 
 func (c *Client) ScannerCapabilities() (*scannerCapabilities, error) {
-	req, err := http.NewRequest("GET", c.GetEndpoint("/eSCL/ScannerCapabilities"), nil)
+	req, err := http.NewRequest("GET", c.getEndpoint("/eSCL/ScannerCapabilities"), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (c *Client) ScannerCapabilities() (*scannerCapabilities, error) {
 }
 
 func (c *Client) createScanJob(settings string) (*url.URL, error) {
-	req, err := http.NewRequest("POST", c.GetEndpoint("/eSCL/ScanJobs"), strings.NewReader(settings))
+	req, err := http.NewRequest("POST", c.getEndpoint("/eSCL/ScanJobs"), strings.NewReader(settings))
 	if err != nil {
 		return nil, err
 	}
@@ -357,11 +357,6 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 		if settings.Duplex && caps.Adf.AdfDuplexInputCaps == nil {
 			return nil, fmt.Errorf("this scanner doesn't support duplex mode")
 		}
-
-		if !settings.Duplex && caps.Adf.AdfSimplexInputCaps == nil {
-			// can this ever happen?
-			return nil, fmt.Errorf("this scanner doesn't support simplex mode")
-		}
 	}
 
 	if c.debug {
@@ -382,7 +377,7 @@ func (c *Client) Scan(settings *ScanSettings) (*ScanState, error) {
 	}, nil
 }
 
-func (c *Client) GetEndpoint(s string) string {
+func (c *Client) getEndpoint(s string) string {
 	return "http://" + c.host + s
 }
 
