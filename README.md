@@ -12,7 +12,7 @@ The `airscan` Go package can be used to scan paper documents 📄 from a scanner
 First, install the example program coming with this package:
 
 ```
-go get -v github.com/stapelberg/airscan/cmd/airscan1
+go install -v github.com/stapelberg/airscan/cmd/airscan1@latest
 ```
 
 Then, query the local network for AirScan compatible devices:
